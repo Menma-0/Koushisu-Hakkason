@@ -1,0 +1,31 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      target: dev          # 開発時は dev ステージを使う（本番は prod に変更）
+    container_name: vis_frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules  # コンテナ側のnode_modulesを壊さないようにする
+    environment:
+      - NUXT_PUBLIC_SUPABASE_URL=${SUPABASE_URL}
+      - NUXT_PUBLIC_SUPABASE_KEY=${SUPABASE_ANON_KEY}
+      - NUXT_PUBLIC_API_BASE=http://localhost:8080
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./backend
+      target: prod
+    container_name: vis_backend
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
