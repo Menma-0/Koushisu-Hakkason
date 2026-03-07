@@ -32,7 +32,7 @@ func handleHealth(w http.ResponseWriter, r *http.Request) {
 }
 
 func handlePredict(w http.ResponseWriter, r *http.Request) {
-	pythonURL := getEnv("PYTHON_SERVICE_URL", "http://python-service:5000")
+	pythonURL := getEnv("PYTHON_SERVICE_URL", "http://python-service:5001")
 
 	resp, err := http.Post(pythonURL+"/predict", "application/json", r.Body)
 	if err != nil {

@@ -29,7 +29,7 @@ services:
       - SUPABASE_URL=${SUPABASE_URL}
       - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - PYTHON_SERVICE_URL=http://python-service:5000
+      - PYTHON_SERVICE_URL=http://python-service:5001
 
   python-service:
     build:
@@ -37,6 +37,6 @@ services:
       target: dev
     container_name: vis_python
     ports:
-      - "5000:5000"
+      - "5001:5001"
     volumes:
       - ./python-service:/app
