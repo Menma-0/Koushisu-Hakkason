@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -11,6 +12,7 @@ func main() {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /health", handleHealth)
+	mux.HandleFunc("POST /predict", handlePredict)
 
 	// CORS ミドルウェアを適用
 	handler := corsMiddleware(mux)
@@ -27,6 +29,23 @@ func handleHealth(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]string{
 		"status": "ok",
 	})
+}
+
+func handlePredict(w http.ResponseWriter, r *http.Request) {
+	pythonURL := getEnv("PYTHON_SERVICE_URL", "http://python-service:5000")
+
+	resp, err := http.Post(pythonURL+"/predict", "application/json", r.Body)
+	if err != nil {
+		writeJSON(w, http.StatusBadGateway, map[string]string{
+			"error": "python service unavailable",
+		})
+		return
+	}
+	defer resp.Body.Close()
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(resp.StatusCode)
+	io.Copy(w, resp.Body)
 }
 
 // --- ヘルパー ---

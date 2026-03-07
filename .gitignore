@@ -1,0 +1,35 @@
+# Environment
+.env
+.env.*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node.js / Nuxt
+node_modules/
+frontend/.nuxt/
+frontend/.output/
+frontend/dist/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Go
+backend/main
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker
+*.log
+
+# npm
+package-lock.json

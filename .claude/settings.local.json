@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(test:*)",
-      "Bash(docker --version 2>&1 && docker compose version 2>&1)"
+      "Bash(docker --version 2>&1 && docker compose version 2>&1)",
+      "Bash(curl:*)"
     ]
   }
 }
