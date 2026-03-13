@@ -1,12 +1,30 @@
 import cv2
 import time
+import os
 from ultralytics import YOLO
 from supabase import create_client, Client
-import os
+from dotenv import load_dotenv  # 追加: dotenvをインポート
+from pathlib import Path        # 追加: Pathをインポート
 
-# 1. Supabaseの設定（ダッシュボードのProject Settings > APIから取得）
-SUPABASE_URL = "https://pjzikvqgnklcpptkvvay.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqemlrdnFnbmtsY3BwdGt2dmF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5MjU5NDYsImV4cCI6MjA4ODUwMTk0Nn0.fBsG46bdwCte5oDno4GnqVhDfNF2Ub0RL4BBzitQSJc"
+# --- 1. 環境変数の読み込み ---
+# 今のファイルの場所（pytqqhon-service内）を取得
+current_dir = Path(__file__).resolve().parent
+
+# 一つ上の階層（ルート）にある .env ファイルのパスを作る
+env_path = current_dir.parent / '.env'
+
+# 指定したパスから環境変数を読み込む
+load_dotenv(dotenv_path=env_path)
+
+# 環境変数を参照する（変数名を統一します）
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY")
+
+# Supabaseクライアントの作成
+if not SUPABASE_URL or not SUPABASE_KEY:
+    print("エラー: .envファイルからURLまたはKEYが読み込めませんでした。")
+    exit()
+
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # --- 2. YOLOモデルの読み込み ---
@@ -19,7 +37,7 @@ cap = cv2.VideoCapture(0)
 TARGET_PRODUCT_ID = 1  
 
 last_upload_time = 0
-upload_interval = 10  # 履歴なので、例えば10秒に1回記録
+upload_interval = 10  # 10秒に1回記録
 
 print(f"実行中... detection_logs に商品ID:{TARGET_PRODUCT_ID} の検知履歴を保存します")
 print("'q'キーで終了")
@@ -38,22 +56,16 @@ while cap.isOpened():
     
     # 10秒ごとに履歴を1件追加（INSERT）
     if current_time - last_upload_time > upload_interval:
-        # 何も映っていない時も「0個だった」という記録を残すならこのまま
-        # 何か映っている時だけ残したいなら if current_shelf_count > 0: を追加
-        
         data = {
-            "product_id": TARGET_PRODUCT_ID,  # どの商品のログか
-            "shelf_count": current_shelf_count, # その時の棚の数
-            "image_url": None,                 # 画像機能を使うまでは空
-            # detected_at はDB側で default now() なら自動設定されます
+            "product_id": TARGET_PRODUCT_ID,
+            "shelf_count": current_shelf_count,
+            "image_url": None,
         }
         
-        try:
-            # .insert() を使うことで、新しい行が追加される
+q        try:
             response = supabase.table("detection_logs").insert(data).execute()
             print(f"【履歴保存】時刻: {time.strftime('%H:%M:%S')} | 商品数: {current_shelf_count}個 を記録しました")
             last_upload_time = current_time
-            
         except Exception as e:
             print(f"【エラー】保存失敗: {e}")
 
