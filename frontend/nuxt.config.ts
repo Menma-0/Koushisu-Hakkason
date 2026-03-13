@@ -1,3 +1,5 @@
+import vuetify from 'vite-plugin-vuetify'
+
 export default defineNuxtConfig({
   devtools: { enabled: true },
 
@@ -5,11 +7,26 @@ export default defineNuxtConfig({
     '@nuxtjs/supabase',
   ],
 
+  build: {
+    transpile: ['vuetify'],
+  },
+
+  vite: {
+    plugins: [
+      vuetify({ autoImport: true }),
+    ],
+  },
+
+  css: [
+    'vuetify/styles',
+    '@mdi/font/css/materialdesignicons.css',
+  ],
+
   supabase: {
     redirectOptions: {
       login: '/login',
       callback: '/confirm',
-      exclude: ['/'],
+      exclude: ['/', '/products/**'],
     },
   },
 
